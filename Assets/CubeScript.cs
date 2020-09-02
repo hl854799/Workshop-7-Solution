@@ -290,9 +290,9 @@ public class CubeScript : MonoBehaviour
         m.triangles = triangles;
 
         // Uncomment the following line to test the Q5 solution:
-        CalculateVertexNormals(m);
-        // (Note that the cube is not defined using shared corner vertices 
-        // so there will not be smooth shading at the corners)
+        //CalculateVertexNormals(m);
+        // (Note that the cube is not defined using shared vertices 
+        // so there will not be smooth shading at the edges/corners)
 
         return m;
     }
