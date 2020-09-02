@@ -4,6 +4,7 @@ using System.Collections;
 public class CubeScript : MonoBehaviour
 {
     public Shader shader;
+    public Texture texture; // For use with PhongShaderTex (Q6)
     public PointLight pointLight;
 
     // Use this for initialization
@@ -19,6 +20,7 @@ public class CubeScript : MonoBehaviour
         // is defined by the MeshFilter component.
         MeshRenderer renderer = this.gameObject.AddComponent<MeshRenderer>();
         renderer.material.shader = shader;
+        renderer.material.mainTexture = texture;
     }
 
     // Called each frame
@@ -113,7 +115,7 @@ public class CubeScript : MonoBehaviour
             Color.yellow,
             Color.yellow,
             Color.yellow,
-            
+
             Color.blue, // Front
             Color.blue,
             Color.blue,
@@ -181,6 +183,50 @@ public class CubeScript : MonoBehaviour
             backNormal
         };*/
 
+        // UV coordinates (to test Q6 solution)
+        m.uv = new[] {
+            new Vector2(0.0f, 0.666f), // Top
+            new Vector2(0.0f, 1.0f),
+            new Vector2(0.333f, 1.0f),
+            new Vector2(0.0f, 0.666f),
+            new Vector2(0.333f, 1.0f),
+            new Vector2(0.333f, 0.666f),
+
+            new Vector2(0.333f, 0.333f), // Bottom
+            new Vector2(0.666f, 0.0f),
+            new Vector2(0.333f, 0.0f),
+            new Vector2(0.333f, 0.333f),
+            new Vector2(0.666f, 0.333f),
+            new Vector2(0.666f, 0.0f),
+
+            new Vector2(0.666f, 0.666f), // Left
+            new Vector2(0.333f, 0.666f),
+            new Vector2(0.333f, 1.0f),
+            new Vector2(0.666f, 0.666f),
+            new Vector2(0.333f, 1.0f),
+            new Vector2(0.666f, 1.0f),
+
+            new Vector2(0.0f, 0.333f), // Right
+            new Vector2(0.333f, 0.666f),
+            new Vector2(0.333f, 0.333f),
+            new Vector2(0.0f, 0.333f),
+            new Vector2(0.0f, 0.666f),
+            new Vector2(0.333f, 0.666f),
+
+            new Vector2(0.666f, 0.666f), // Front
+            new Vector2(0.333f, 0.333f),
+            new Vector2(0.333f, 0.666f),
+            new Vector2(0.666f, 0.666f),
+            new Vector2(0.666f, 0.333f),
+            new Vector2(0.333f, 0.333f),
+
+            new Vector2(0.0f, 0.333f), // Back
+            new Vector2(0.333f, 0.333f),
+            new Vector2(0.333f, 0.0f),
+            new Vector2(0.0f, 0.0f),
+            new Vector2(0.0f, 0.333f),
+            new Vector2(0.333f, 0.0f)
+        };
 
         // Vertex normals
         Vector3 frontBottomLeftNormal = (new Vector3(-1.0f, -1.0f, 1.0f)).normalized;
@@ -243,6 +289,62 @@ public class CubeScript : MonoBehaviour
 
         m.triangles = triangles;
 
+        // Uncomment the following line to test the Q5 solution:
+        CalculateVertexNormals(m);
+        // (Note that the cube is not defined using shared corner vertices 
+        // so there will not be smooth shading at the corners)
+
         return m;
+    }
+
+    // Challenge Q5 solution.
+    // The following function updates mesh m with vertex normals, calculated by 
+    // averaging the face normals of surrounding triangles. Note that this 
+    // function will only average face normals of directly *connected* triangles. 
+    // e.g. A vertex in the same spatial location (but separately connected) will 
+    // have its own normal. This can lead to hard edges, depending on the mesh
+    // layout. The overall behaviour is similar, if not identical, to the built-in
+    // Unity mesh helper method Mesh.RecalculateNormals().
+    private void CalculateVertexNormals(Mesh m)
+    {
+        // 1. Initialise a normal "sum" vector for each vertex in the mesh
+        Vector3[] normalSums = new Vector3[m.vertices.Length]; // One normal per vertex
+        for (int i = 0; i < normalSums.Length; i++)
+        {
+            normalSums[i] = Vector3.zero;
+        }
+
+        // 2. For each triangle, calculate its face normal (cross product)
+        // 3. Add that face normal to the 3 corresponding vertex normal sums
+        for (int tri = 0; tri < m.triangles.Length / 3; tri++)
+        {
+            // Get the three vertex positions for a triangle
+            Vector3 v1 = m.vertices[tri * 3];
+            Vector3 v2 = m.vertices[tri * 3 + 1];
+            Vector3 v3 = m.vertices[tri * 3 + 2];
+
+            // Calculate a face normal from its three vertex positions.
+            // Note that we ensure this is a unit vector (normalized),
+            // otherwise the *magnitude* of the cross product would lead
+            // to greater weighting for larger triangles.
+            Vector3 faceNormal = Vector3.Cross(v2 - v1, v3 - v1).normalized;
+
+            // Add the face normal to the running sum of each corresponding
+            // vertex normal (in order to take an average later on).
+            for (int i = 0; i < 3; i++)
+            {
+                normalSums[tri * 3 + i] += faceNormal;
+            }
+        }
+
+        // 4. Average (normalise) the normal sums so they are all length 1
+        //    At this point, they are no longer "sums", but averages
+        for (int i = 0; i < normalSums.Length; i++)
+        {
+            normalSums[i].Normalize();
+        }
+
+        // 5. Update the mesh data with the generated normals
+        m.normals = normalSums;
     }
 }
