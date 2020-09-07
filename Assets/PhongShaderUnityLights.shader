@@ -22,7 +22,7 @@
 // Adapted further by Chris Ewin, 23 Sep 2013
 // Adapted further (again) by Alex Zable (port to Unity), 19 Aug 2016
 
-// Challenge Q7.
+// Challenge Q6.
 //
 // This shader is a variation on PhongShader.shader to utilise built-in
 // Unity lights in the shader. A full reference for the relevant uniform
@@ -111,13 +111,13 @@ Shader "Unlit/PhongShaderUnityLights"
 				// (when calculating the reflected ray in our specular component)
 				float fAtt = 1;
 				float Kd = 1;
-				float3 L = _WorldSpaceLightPos0; // Q7: Using built-in Unity light data: _WorldSpaceLightPos0.
+				float3 L = _WorldSpaceLightPos0; // Q6: Using built-in Unity light data: _WorldSpaceLightPos0.
 				                                 // Note that we are using a *directional* light in this instance,
 												 // so _WorldSpaceLightPos0 is actually a direction rather than
 												 // a point. Therefore there is no need to subtract the world
 												 // space vertex position like in our point-light shaders.
 				float LdotN = dot(L, interpNormal);
-				float3 dif = fAtt * _LightColor0 * Kd * v.color.rgb * saturate(LdotN); // Q7: Using built-in Unity light data: _LightColor0
+				float3 dif = fAtt * _LightColor0 * Kd * v.color.rgb * saturate(LdotN); // Q6: Using built-in Unity light data: _LightColor0
 
 				// Calculate specular reflections
 				float Ks = 1;
@@ -126,7 +126,7 @@ Shader "Unlit/PhongShaderUnityLights"
 				// Using Blinn-Phong approximation:
 				specN = 25; // We usually need a higher specular power when using Blinn-Phong
 				float3 H = normalize(V + L);
-				float3 spe = fAtt * _LightColor0 * Ks * pow(saturate(dot(interpNormal, H)), specN); // Q7: Using built-in Unity light data: _LightColor0
+				float3 spe = fAtt * _LightColor0 * Ks * pow(saturate(dot(interpNormal, H)), specN); // Q6: Using built-in Unity light data: _LightColor0
 
 				// Combine Phong illumination model components
 				float4 returnColor = float4(0.0f, 0.0f, 0.0f, 0.0f);

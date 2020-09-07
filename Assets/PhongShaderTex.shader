@@ -22,7 +22,7 @@
 // Adapted further by Chris Ewin, 23 Sep 2013
 // Adapted further (again) by Alex Zable (port to Unity), 19 Aug 2016
 
-// Challenge Q6.
+// Challenge Q5.
 //
 // This shader is a variation on PhongShader.shader to utilise textures
 // instead of vertex colours as the "unlit" base colours.
